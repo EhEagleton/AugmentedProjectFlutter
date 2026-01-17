@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'dart:typed_data';
 import 'image_editor_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,10 +17,11 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
+        final imageBytes = await image.readAsBytes();
         if (!mounted) return;
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => ImageEditorScreen(imagePath: image.path),
+            builder: (_) => ImageEditorScreen(imageData: imageBytes),
           ),
         );
       }

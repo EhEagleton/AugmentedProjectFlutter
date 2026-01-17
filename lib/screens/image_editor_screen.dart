@@ -1,16 +1,13 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:image/image.dart' as img;
-import 'package:advanced_image_processing_toolkit/advanced_image_processing_toolkit.dart';
 import '../models/processing_state.dart';
 import '../widgets/adjustment_slider.dart';
 import '../services/image_processor_service.dart';
 
 class ImageEditorScreen extends StatefulWidget {
-  final String imagePath;
+  final Uint8List imageData;
 
-  const ImageEditorScreen({Key? key, required this.imagePath}) : super(key: key);
+  const ImageEditorScreen({Key? key, required this.imageData}) : super(key: key);
 
   @override
   State<ImageEditorScreen> createState() => _ImageEditorScreenState();
@@ -24,12 +21,12 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   @override
   void initState() {
     super.initState();
-    _processorService = ImageProcessorService(widget.imagePath);
+    _processorService = ImageProcessorService('');
     _loadOriginalImage();
   }
 
   void _loadOriginalImage() async {
-    _state.originalImage = File(widget.imagePath).readAsBytesSync();
+    _state.originalImage = widget.imageData;
     _state.processedImage = _state.originalImage;
     setState(() {});
   }
