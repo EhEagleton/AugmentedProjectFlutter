@@ -33,7 +33,8 @@ jobs:
       # Optional but safe for Pages (prevents Jekyll edge-cases)
       - run: touch build/web/.nojekyll
 
-      - uses: actions/upload-pages-artifact@v4
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v4
         with:
           path: build/web
 
