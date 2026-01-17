@@ -32,14 +32,9 @@ jobs:
 
       - name: Verify build output
         run: |
-          echo "Listing build/web contents:"
           ls -la build/web/
-          echo ""
-          echo "Checking for flutter.js..."
-          test -f build/web/flutter.js && echo "✓ flutter.js found" || echo "✗ flutter.js NOT found!"
-          echo ""
-          echo "Checking for index.html..."
-          test -f build/web/index.html && echo "✓ index.html found" || echo "✗ index.html NOT found!"
+          test -f build/web/index.html && echo "✓ index.html found"
+          test -f build/web/flutter.js && echo "✓ flutter.js found"
 
       - name: Add .nojekyll file
         run: touch build/web/.nojekyll
