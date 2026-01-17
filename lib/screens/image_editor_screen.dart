@@ -123,147 +123,173 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         title: const Text('Image Editor'),
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 3,
-            child: Container(
-              color: Colors.black12,
-              child: _state.processedImage != null
-                  ? Image.memory(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth > 800;
+
+          Widget imageArea = Container(
+            color: Colors.black12,
+            alignment: Alignment.center,
+            child: _state.processedImage != null
+                ? InteractiveViewer(
+                    panEnabled: true,
+                    minScale: 1.0,
+                    maxScale: 4.0,
+                    child: Image.memory(
                       _state.processedImage!,
                       fit: BoxFit.contain,
-                    )
-                  : const Center(child: CircularProgressIndicator()),
+                    ),
+                  )
+                : const Center(child: CircularProgressIndicator()),
+          );
+
+          Widget controls = SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Filters
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Filters',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 50,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            _FilterButton(
+                              label: 'Grayscale',
+                              onPressed: () => _applyFilter('grayscale'),
+                              isActive: _state.currentFilter == 'grayscale',
+                              isProcessing: _isProcessing,
+                            ),
+                            const SizedBox(width: 8),
+                            _FilterButton(
+                              label: 'Sepia',
+                              onPressed: () => _applyFilter('sepia'),
+                              isActive: _state.currentFilter == 'sepia',
+                              isProcessing: _isProcessing,
+                            ),
+                            const SizedBox(width: 8),
+                            _FilterButton(
+                              label: 'Blur',
+                              onPressed: () => _applyFilter('blur'),
+                              isActive: _state.currentFilter == 'blur',
+                              isProcessing: _isProcessing,
+                            ),
+                            const SizedBox(width: 8),
+                            _FilterButton(
+                              label: 'Edge Detect',
+                              onPressed: () => _applyFilter('edge'),
+                              isActive: _state.currentFilter == 'edge',
+                              isProcessing: _isProcessing,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Adjustments
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Adjustments',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AdjustmentSlider(
+                        label: 'Brightness',
+                        value: _state.brightness,
+                        min: -1.0,
+                        max: 1.0,
+                        onChanged: _adjustBrightness,
+                      ),
+                      const SizedBox(height: 8),
+                      AdjustmentSlider(
+                        label: 'Contrast',
+                        value: _state.contrast,
+                        min: 0.5,
+                        max: 2.0,
+                        onChanged: _adjustContrast,
+                      ),
+                      const SizedBox(height: 8),
+                      AdjustmentSlider(
+                        label: 'Saturation',
+                        value: _state.saturation,
+                        min: 0.0,
+                        max: 2.0,
+                        onChanged: _applySaturation,
+                      ),
+                    ],
+                  ),
+                ),
+                // Action buttons
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _reset,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reset'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Image processing completed!'),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.save),
+                        label: const Text('Save'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Filters
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Filters',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 50,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              _FilterButton(
-                                label: 'Grayscale',
-                                onPressed: () => _applyFilter('grayscale'),
-                                isActive: _state.currentFilter == 'grayscale',
-                                isProcessing: _isProcessing,
-                              ),
-                              const SizedBox(width: 8),
-                              _FilterButton(
-                                label: 'Sepia',
-                                onPressed: () => _applyFilter('sepia'),
-                                isActive: _state.currentFilter == 'sepia',
-                                isProcessing: _isProcessing,
-                              ),
-                              const SizedBox(width: 8),
-                              _FilterButton(
-                                label: 'Blur',
-                                onPressed: () => _applyFilter('blur'),
-                                isActive: _state.currentFilter == 'blur',
-                                isProcessing: _isProcessing,
-                              ),
-                              const SizedBox(width: 8),
-                              _FilterButton(
-                                label: 'Edge Detect',
-                                onPressed: () => _applyFilter('edge'),
-                                isActive: _state.currentFilter == 'edge',
-                                isProcessing: _isProcessing,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+          );
+
+          if (isWide) {
+            return Row(
+              children: [
+                Expanded(flex: 3, child: imageArea),
+                SizedBox(
+                  width: 420,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: controls,
                   ),
-                  // Adjustments
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Adjustments',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        AdjustmentSlider(
-                          label: 'Brightness',
-                          value: _state.brightness,
-                          min: -1.0,
-                          max: 1.0,
-                          onChanged: _adjustBrightness,
-                        ),
-                        const SizedBox(height: 8),
-                        AdjustmentSlider(
-                          label: 'Contrast',
-                          value: _state.contrast,
-                          min: 0.5,
-                          max: 2.0,
-                          onChanged: _adjustContrast,
-                        ),
-                        const SizedBox(height: 8),
-                        AdjustmentSlider(
-                          label: 'Saturation',
-                          value: _state.saturation,
-                          min: 0.0,
-                          max: 2.0,
-                          onChanged: _applySaturation,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Action buttons
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _reset,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Reset'),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Image processing completed!'),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.save),
-                          label: const Text('Save'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+                ),
+              ],
+            );
+          }
+
+          return Column(
+            children: [
+              Expanded(flex: 3, child: imageArea),
+              Expanded(flex: 2, child: controls),
+            ],
+          );
+        },
       ),
     );
   }
