@@ -8,6 +8,8 @@ void main() {
     print('Stack Trace: ${details.stack}');
   };
   
+  print('App starting...');
+  
   runApp(const MyApp());
 }
 

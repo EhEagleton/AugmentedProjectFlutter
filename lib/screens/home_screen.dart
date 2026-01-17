@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
 import 'image_editor_screen.dart';
 
@@ -15,6 +16,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
+      if (kIsWeb && source == ImageSource.camera) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Camera not supported on web. Use gallery instead.')),
+        );
+        return;
+      }
+      
       final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
         final imageBytes = await image.readAsBytes();
@@ -27,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      print('Error picking image: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error picking image: $e')),
       );
@@ -83,18 +93,6 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () => _pickImage(ImageSource.gallery),
               icon: const Icon(Icons.photo_library),
               label: const Text('From Gallery'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: () => _pickImage(ImageSource.camera),
-              icon: const Icon(Icons.camera_alt),
-              label: const Text('Take Photo'),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,

@@ -27,11 +27,14 @@ jobs:
 
       - run: flutter pub get
 
-      # For project pages: https://user.github.io/REPO/
-      - run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
 
-      # Optional but safe for Pages (prevents Jekyll edge-cases)
-      - run: touch build/web/.nojekyll
+      - name: Verify build output
+        run: ls -la build/web/ && test -f build/web/index.html && echo "✓ index.html found"
+
+      - name: Add .nojekyll file
+        run: touch build/web/.nojekyll
 
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v4

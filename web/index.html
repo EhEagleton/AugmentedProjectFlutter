@@ -52,15 +52,43 @@
         var loading = document.getElementById("loading");
         if(loading) loading.remove();
       });
+      
+      window.addEventListener('error', function(event) {
+        console.error('JavaScript Error:', event.error);
+        var loading = document.getElementById("loading");
+        if(loading) {
+          loading.innerText = 'Error loading app. Check console for details.';
+          loading.style.color = '#ff6b6b';
+        }
+      });
     </script>
     <script>
       _flutter.loader.loadEntrypoint({
         serviceWorkerVersion: serviceWorkerVersion,
         onEntrypointLoaded: function(engineInitializer) {
+          console.log('Flutter entrypoint loaded');
           engineInitializer.initializeEngine().then(function(appRunner) {
+            console.log('Engine initialized, running app');
             appRunner.runApp();
+          }).catch(function(error) {
+            console.error('Error initializing engine:', error);
+            var loading = document.getElementById("loading");
+            if(loading) {
+              loading.innerText = 'Failed to initialize app: ' + error.message;
+              loading.style.color = '#ff6b6b';
+            }
           });
+        },
+        onEntrypointNotLoaded: function(error) {
+          console.error('Failed to load entrypoint:', error);
+          var loading = document.getElementById("loading");
+          if(loading) {
+            loading.innerText = 'Failed to load app entrypoint';
+            loading.style.color = '#ff6b6b';
+          }
         }
+      }).catch(function(error) {
+        console.error('Error loading Flutter:', error);
       });
     </script>
   </body>
