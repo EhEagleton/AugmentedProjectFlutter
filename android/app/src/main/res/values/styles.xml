@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme applied to the Android Window while the process is starting when the OS has decided to display the app -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+    </style>
+    <!-- Theme applied to the Android Window as soon as the process has started.
+         This theme determines the color of the Android Window while your Flutter UI initializes, as well as behind your Flutter UI while its running.
+         This theme is only used if you have defined a windowBackground or no activity in your manifest. If you have an activity in your manifest,
+         this theme does not affect the window background of the activity itself.
+
+         The Flutter app will first render its content inside of the AppCompatActivity, which means you
+         must provide an empty activity theme that allows the Flutter app to fully take over the screen. -->
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+    </style>
+</resources>
