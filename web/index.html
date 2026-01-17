@@ -43,23 +43,31 @@
     <script src="flutter.js" defer></script>
   </head>
   <body>
-    <div id="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #1f1f1f; color: white; font-family: sans-serif;">
-      Loading Image Processor...
+    <div id="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #1f1f1f; color: white; font-family: sans-serif; flex-direction: column; padding: 20px;">
+      <div id="status-text" style="font-size: 18px; margin-bottom: 20px;">Loading Image Processor...</div>
+      <div id="error-container" style="display: none; background-color: #ff6b6b; padding: 20px; border-radius: 8px; max-width: 500px; text-align: center; margin-top: 20px;">
+        <div id="error-message" style="font-size: 14px; word-break: break-word;"></div>
+      </div>
     </div>
 
     <script>
-      window.addEventListener('flutter-first-frame', function() {
-        var loading = document.getElementById("loading");
-        if(loading) loading.remove();
-      });
-      
+      function showError(message) {
+        console.error(message);
+        var statusText = document.getElementById("status-text");
+        var errorContainer = document.getElementById("error-container");
+        var errorMessage = document.getElementById("error-message");
+        
+        statusText.innerText = 'Error Loading App';
+        errorMessage.innerText = message;
+        errorContainer.style.display = 'block';
+      }
+
       window.addEventListener('error', function(event) {
-        console.error('JavaScript Error:', event.error);
-        var loading = document.getElementById("loading");
-        if(loading) {
-          loading.innerText = 'Error loading app. Check console for details.';
-          loading.style.color = '#ff6b6b';
-        }
+        showError('JavaScript Error: ' + (event.error?.message || event.message || 'Unknown error'));
+      });
+
+      window.addEventListener('unhandledrejection', function(event) {
+        showError('Unhandled Promise Rejection: ' + (event.reason?.message || event.reason || 'Unknown error'));
       });
     </script>
     <script>
@@ -67,28 +75,30 @@
         serviceWorkerVersion: serviceWorkerVersion,
         onEntrypointLoaded: function(engineInitializer) {
           console.log('Flutter entrypoint loaded');
+          document.getElementById("status-text").innerText = 'Initializing Engine...';
           engineInitializer.initializeEngine().then(function(appRunner) {
             console.log('Engine initialized, running app');
+            document.getElementById("status-text").innerText = 'Starting App...';
             appRunner.runApp();
+            // Hide loading screen after app starts
+            window.addEventListener('flutter-first-frame', function() {
+              var loading = document.getElementById("loading");
+              if(loading) {
+                loading.style.opacity = '0';
+                setTimeout(function() {
+                  loading.style.display = 'none';
+                }, 300);
+              }
+            });
           }).catch(function(error) {
-            console.error('Error initializing engine:', error);
-            var loading = document.getElementById("loading");
-            if(loading) {
-              loading.innerText = 'Failed to initialize app: ' + error.message;
-              loading.style.color = '#ff6b6b';
-            }
+            showError('Failed to initialize engine: ' + (error?.message || error || 'Unknown error'));
           });
         },
         onEntrypointNotLoaded: function(error) {
-          console.error('Failed to load entrypoint:', error);
-          var loading = document.getElementById("loading");
-          if(loading) {
-            loading.innerText = 'Failed to load app entrypoint';
-            loading.style.color = '#ff6b6b';
-          }
+          showError('Failed to load Flutter entrypoint: ' + (error?.message || error || 'Unknown error'));
         }
       }).catch(function(error) {
-        console.error('Error loading Flutter:', error);
+        showError('Error loading Flutter: ' + (error?.message || error || 'Unknown error'));
       });
     </script>
   </body>
