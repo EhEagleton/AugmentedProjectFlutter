@@ -19,3 +19,9 @@
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Use local plugin for Flutter environment cleanup before build
+# IMPORTANT: Remove netlify-plugin-flutter from the Netlify UI (Site settings → Plugins)
+# to avoid duplicate plugin errors
+[[plugins]]
+  package = "./local-plugins/netlify-plugin-flutter"

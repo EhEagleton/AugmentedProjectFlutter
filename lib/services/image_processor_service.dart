@@ -96,27 +96,7 @@ class ImageProcessorService {
       img.Image? image = img.decodeImage(imageData);
       if (image == null) return imageData;
 
-      for (int y = 0; y < image.height; y++) {
-        for (int x = 0; x < image.width; x++) {
-          final pixel = image.getPixelSafe(x, y);
-          int r = _redFromPixel(pixel);
-          int g = _greenFromPixel(pixel);
-          int b = _blueFromPixel(pixel);
-          final a = _alphaFromPixel(pixel);
-
-          // Convert to HSL
-          final max = [r, g, b].reduce((a, b) => a > b ? a : b);
-          final min = [r, g, b].reduce((a, b) => a < b ? a : b);
-          final delta = max - min;
-
-          // Apply saturation
-          r = (r * saturation).clamp(0, 255).toInt();
-          g = (g * saturation).clamp(0, 255).toInt();
-          b = (b * saturation).clamp(0, 255).toInt();
-
-          image.setPixelRgba(x, y, r, g, b, a);
-        }
-      }
+      image = img.adjustColor(image, saturation: saturation);
 
       return Uint8List.fromList(img.encodeJpg(image));
     } catch (e) {
