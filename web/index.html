@@ -41,6 +41,14 @@
     </script>
     <!-- This script adds the flutter initialization JS code -->
     <script src="flutter.js" defer></script>
+    <script>
+      // Check if flutter.js is loaded
+      setTimeout(function() {
+        if (typeof _flutter === 'undefined') {
+          console.warn('flutter.js not loaded, checking status...');
+        }
+      }, 2000);
+    </script>
   </head>
   <body>
     <div id="loading" style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #1f1f1f; color: white; font-family: sans-serif; flex-direction: column; padding: 20px;">
@@ -71,35 +79,61 @@
       });
     </script>
     <script>
-      _flutter.loader.loadEntrypoint({
-        serviceWorkerVersion: serviceWorkerVersion,
-        onEntrypointLoaded: function(engineInitializer) {
-          console.log('Flutter entrypoint loaded');
-          document.getElementById("status-text").innerText = 'Initializing Engine...';
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            console.log('Engine initialized, running app');
-            document.getElementById("status-text").innerText = 'Starting App...';
-            appRunner.runApp();
-            // Hide loading screen after app starts
-            window.addEventListener('flutter-first-frame', function() {
-              var loading = document.getElementById("loading");
-              if(loading) {
-                loading.style.opacity = '0';
-                setTimeout(function() {
-                  loading.style.display = 'none';
-                }, 300);
-              }
-            });
-          }).catch(function(error) {
-            showError('Failed to initialize engine: ' + (error?.message || error || 'Unknown error'));
-          });
-        },
-        onEntrypointNotLoaded: function(error) {
-          showError('Failed to load Flutter entrypoint: ' + (error?.message || error || 'Unknown error'));
+      // Wait for flutter.js to load
+      var flutterLoaded = false;
+      var maxAttempts = 30; // 30 * 200ms = 6 seconds
+      var attempts = 0;
+
+      function checkFlutterLoaded() {
+        attempts++;
+        if (typeof _flutter !== 'undefined') {
+          flutterLoaded = true;
+          initializeFlutter();
+          return;
         }
-      }).catch(function(error) {
-        showError('Error loading Flutter: ' + (error?.message || error || 'Unknown error'));
-      });
+        
+        if (attempts >= maxAttempts) {
+          showError('Failed to load Flutter framework. Please ensure the app has been built with "flutter build web --release". Check that build/web directory contains flutter.js file.');
+          return;
+        }
+        
+        setTimeout(checkFlutterLoaded, 200);
+      }
+
+      function initializeFlutter() {
+        _flutter.loader.loadEntrypoint({
+          serviceWorkerVersion: serviceWorkerVersion,
+          onEntrypointLoaded: function(engineInitializer) {
+            console.log('Flutter entrypoint loaded');
+            document.getElementById("status-text").innerText = 'Initializing Engine...';
+            engineInitializer.initializeEngine().then(function(appRunner) {
+              console.log('Engine initialized, running app');
+              document.getElementById("status-text").innerText = 'Starting App...';
+              appRunner.runApp();
+              // Hide loading screen after app starts
+              window.addEventListener('flutter-first-frame', function() {
+                var loading = document.getElementById("loading");
+                if(loading) {
+                  loading.style.opacity = '0';
+                  setTimeout(function() {
+                    loading.style.display = 'none';
+                  }, 300);
+                }
+              });
+            }).catch(function(error) {
+              showError('Failed to initialize engine: ' + (error?.message || error || 'Unknown error'));
+            });
+          },
+          onEntrypointNotLoaded: function(error) {
+            showError('Failed to load Flutter entrypoint: ' + (error?.message || error || 'Unknown error'));
+          }
+        }).catch(function(error) {
+          showError('Error loading Flutter: ' + (error?.message || error || 'Unknown error'));
+        });
+      }
+
+      // Start checking for flutter.js
+      checkFlutterLoaded();
     </script>
   </body>
 </html>

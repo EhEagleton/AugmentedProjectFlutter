@@ -31,7 +31,15 @@ jobs:
         run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
 
       - name: Verify build output
-        run: ls -la build/web/ && test -f build/web/index.html && echo "✓ index.html found"
+        run: |
+          echo "Listing build/web contents:"
+          ls -la build/web/
+          echo ""
+          echo "Checking for flutter.js..."
+          test -f build/web/flutter.js && echo "✓ flutter.js found" || echo "✗ flutter.js NOT found!"
+          echo ""
+          echo "Checking for index.html..."
+          test -f build/web/index.html && echo "✓ index.html found" || echo "✗ index.html NOT found!"
 
       - name: Add .nojekyll file
         run: touch build/web/.nojekyll
