@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
+  // Enable error logging for web
+  FlutterError.onError = (FlutterErrorDetails details) {
+    print('Flutter Error: ${details.exception}');
+    print('Stack Trace: ${details.stack}');
+  };
+  
   runApp(const MyApp());
 }
 
@@ -17,6 +23,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const HomeScreen(),
+      // Add error widget for debugging
+      builder: (context, child) {
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }
