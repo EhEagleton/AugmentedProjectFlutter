@@ -1,3 +1,9 @@
+plugins {
+    id "com.android.application" version "7.3.0" apply false
+    id "com.android.library" version "7.3.0" apply false
+    id "dev.flutter.flutter-gradle-plugin" version "1.0.0" apply false
+}
+
 include ':app'
 
 def localPropertiesFile = new File(rootProject.projectDir, 'local.properties')
@@ -11,5 +17,3 @@ def flutterSdkPath = properties.getProperty('flutter.sdk')
 if (flutterSdkPath == null) {
     throw new Exception('Flutter SDK not found. Define location with flutter.sdk in the local.properties file.')
 }
-
-apply from: "$flutterSdkPath/packages/flutter_tools/gradle/app_plugin_loader.gradle"
