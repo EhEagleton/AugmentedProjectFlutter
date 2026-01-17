@@ -6,6 +6,14 @@ class ImageProcessorService {
 
   ImageProcessorService(this.imagePath);
 
+  // Helper functions for color channel extraction (works with newer package:image)
+  static int _redFromColor(int c) => (c >> 16) & 0xFF;
+  static int _greenFromColor(int c) => (c >> 8) & 0xFF;
+  static int _blueFromColor(int c) => c & 0xFF;
+  static int _alphaFromColor(int c) => (c >> 24) & 0xFF;
+  static int _makeColor(int r, int g, int b, int a) =>
+      ((a & 0xFF) << 24) | ((r & 0xFF) << 16) | ((g & 0xFF) << 8) | (b & 0xFF);
+
   Future<Uint8List> applyFilter(Uint8List imageData, String filterType) async {
     try {
       img.Image? image = img.decodeImage(imageData);
@@ -42,13 +50,15 @@ class ImageProcessorService {
 
       // Brightness adjustment (range: -1.0 to 1.0)
       final factor = 1 + brightness;
-      for (int i = 0; i < image.length; i++) {
-        final pixel = image[i];
-        final r = (img.getRed(pixel) * factor).clamp(0, 255).toInt();
-        final g = (img.getGreen(pixel) * factor).clamp(0, 255).toInt();
-        final b = (img.getBlue(pixel) * factor).clamp(0, 255).toInt();
-        final a = img.getAlpha(pixel);
-        image[i] = img.getColor(r, g, b, a);
+      for (int y = 0; y < image.height; y++) {
+        for (int x = 0; x < image.width; x++) {
+          final pixel = image.getPixelSafe(x, y);
+          final r = (_redFromColor(pixel) * factor).clamp(0, 255).toInt();
+          final g = (_greenFromColor(pixel) * factor).clamp(0, 255).toInt();
+          final b = (_blueFromColor(pixel) * factor).clamp(0, 255).toInt();
+          final a = _alphaFromColor(pixel);
+          image.setPixelSafe(x, y, _makeColor(r, g, b, a));
+        }
       }
 
       return Uint8List.fromList(img.encodeJpg(image));
@@ -65,13 +75,15 @@ class ImageProcessorService {
 
       // Contrast adjustment (range: 0.5 to 2.0)
       final factor = contrast;
-      for (int i = 0; i < image.length; i++) {
-        final pixel = image[i];
-        final r = ((img.getRed(pixel) - 128) * factor + 128).clamp(0, 255).toInt();
-        final g = ((img.getGreen(pixel) - 128) * factor + 128).clamp(0, 255).toInt();
-        final b = ((img.getBlue(pixel) - 128) * factor + 128).clamp(0, 255).toInt();
-        final a = img.getAlpha(pixel);
-        image[i] = img.getColor(r, g, b, a);
+      for (int y = 0; y < image.height; y++) {
+        for (int x = 0; x < image.width; x++) {
+          final pixel = image.getPixelSafe(x, y);
+          final r = ((_redFromColor(pixel) - 128) * factor + 128).clamp(0, 255).toInt();
+          final g = ((_greenFromColor(pixel) - 128) * factor + 128).clamp(0, 255).toInt();
+          final b = ((_blueFromColor(pixel) - 128) * factor + 128).clamp(0, 255).toInt();
+          final a = _alphaFromColor(pixel);
+          image.setPixelSafe(x, y, _makeColor(r, g, b, a));
+        }
       }
 
       return Uint8List.fromList(img.encodeJpg(image));
@@ -86,24 +98,26 @@ class ImageProcessorService {
       img.Image? image = img.decodeImage(imageData);
       if (image == null) return imageData;
 
-      for (int i = 0; i < image.length; i++) {
-        final pixel = image[i];
-        int r = img.getRed(pixel);
-        int g = img.getGreen(pixel);
-        int b = img.getBlue(pixel);
-        final a = img.getAlpha(pixel);
+      for (int y = 0; y < image.height; y++) {
+        for (int x = 0; x < image.width; x++) {
+          final pixel = image.getPixelSafe(x, y);
+          int r = _redFromColor(pixel);
+          int g = _greenFromColor(pixel);
+          int b = _blueFromColor(pixel);
+          final a = _alphaFromColor(pixel);
 
-        // Convert to HSL
-        final max = [r, g, b].reduce((a, b) => a > b ? a : b);
-        final min = [r, g, b].reduce((a, b) => a < b ? a : b);
-        final delta = max - min;
+          // Convert to HSL
+          final max = [r, g, b].reduce((a, b) => a > b ? a : b);
+          final min = [r, g, b].reduce((a, b) => a < b ? a : b);
+          final delta = max - min;
 
-        // Apply saturation
-        r = (r * saturation).clamp(0, 255).toInt();
-        g = (g * saturation).clamp(0, 255).toInt();
-        b = (b * saturation).clamp(0, 255).toInt();
+          // Apply saturation
+          r = (r * saturation).clamp(0, 255).toInt();
+          g = (g * saturation).clamp(0, 255).toInt();
+          b = (b * saturation).clamp(0, 255).toInt();
 
-        image[i] = img.getColor(r, g, b, a);
+          image.setPixelSafe(x, y, _makeColor(r, g, b, a));
+        }
       }
 
       return Uint8List.fromList(img.encodeJpg(image));
@@ -118,17 +132,19 @@ class ImageProcessorService {
   }
 
   img.Image _applySepia(img.Image image) {
-    for (int i = 0; i < image.length; i++) {
-      final pixel = image[i];
-      final r = img.getRed(pixel);
-      final g = img.getGreen(pixel);
-      final b = img.getBlue(pixel);
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        final pixel = image.getPixelSafe(x, y);
+        final r = _redFromColor(pixel);
+        final g = _greenFromColor(pixel);
+        final b = _blueFromColor(pixel);
 
-      final tr = (0.393 * r + 0.769 * g + 0.189 * b).clamp(0, 255).toInt();
-      final tg = (0.349 * r + 0.686 * g + 0.168 * b).clamp(0, 255).toInt();
-      final tb = (0.272 * r + 0.534 * g + 0.131 * b).clamp(0, 255).toInt();
+        final tr = (0.393 * r + 0.769 * g + 0.189 * b).clamp(0, 255).toInt();
+        final tg = (0.349 * r + 0.686 * g + 0.168 * b).clamp(0, 255).toInt();
+        final tb = (0.272 * r + 0.534 * g + 0.131 * b).clamp(0, 255).toInt();
 
-      image[i] = img.getColor(tr, tg, tb, img.getAlpha(pixel));
+        image.setPixelSafe(x, y, _makeColor(tr, tg, tb, _alphaFromColor(pixel)));
+      }
     }
     return image;
   }
