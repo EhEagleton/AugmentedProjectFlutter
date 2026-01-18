@@ -126,6 +126,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth > 800;
+          final isMedium = constraints.maxWidth > 500;
 
           Widget imageArea = Container(
             color: Colors.black12,
@@ -144,125 +145,128 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
           );
 
           Widget controls = SingleChildScrollView(
+            padding: EdgeInsets.all(isMedium ? 20 : 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Filters
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Filters',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Filters',
+                      style: TextStyle(
+                        fontSize: isMedium ? 18 : 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 50,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            _FilterButton(
-                              label: 'Grayscale',
-                              onPressed: () => _applyFilter('grayscale'),
-                              isActive: _state.currentFilter == 'grayscale',
-                              isProcessing: _isProcessing,
-                            ),
-                            const SizedBox(width: 8),
-                            _FilterButton(
-                              label: 'Sepia',
-                              onPressed: () => _applyFilter('sepia'),
-                              isActive: _state.currentFilter == 'sepia',
-                              isProcessing: _isProcessing,
-                            ),
-                            const SizedBox(width: 8),
-                            _FilterButton(
-                              label: 'Blur',
-                              onPressed: () => _applyFilter('blur'),
-                              isActive: _state.currentFilter == 'blur',
-                              isProcessing: _isProcessing,
-                            ),
-                            const SizedBox(width: 8),
-                            _FilterButton(
-                              label: 'Edge Detect',
-                              onPressed: () => _applyFilter('edge'),
-                              isActive: _state.currentFilter == 'edge',
-                              isProcessing: _isProcessing,
-                            ),
-                          ],
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _FilterButton(
+                          label: 'Grayscale',
+                          onPressed: () => _applyFilter('grayscale'),
+                          isActive: _state.currentFilter == 'grayscale',
+                          isProcessing: _isProcessing,
                         ),
-                      ),
-                    ],
-                  ),
+                        _FilterButton(
+                          label: 'Sepia',
+                          onPressed: () => _applyFilter('sepia'),
+                          isActive: _state.currentFilter == 'sepia',
+                          isProcessing: _isProcessing,
+                        ),
+                        _FilterButton(
+                          label: 'Blur',
+                          onPressed: () => _applyFilter('blur'),
+                          isActive: _state.currentFilter == 'blur',
+                          isProcessing: _isProcessing,
+                        ),
+                        _FilterButton(
+                          label: 'Edge Detect',
+                          onPressed: () => _applyFilter('edge'),
+                          isActive: _state.currentFilter == 'edge',
+                          isProcessing: _isProcessing,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 24),
                 // Adjustments
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Adjustments',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Adjustments',
+                      style: TextStyle(
+                        fontSize: isMedium ? 18 : 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    AdjustmentSlider(
+                      label: 'Brightness',
+                      value: _state.brightness,
+                      min: -1.0,
+                      max: 1.0,
+                      onChanged: _adjustBrightness,
+                    ),
+                    const SizedBox(height: 8),
+                    AdjustmentSlider(
+                      label: 'Contrast',
+                      value: _state.contrast,
+                      min: 0.5,
+                      max: 2.0,
+                      onChanged: _adjustContrast,
+                    ),
+                    const SizedBox(height: 8),
+                    AdjustmentSlider(
+                      label: 'Saturation',
+                      value: _state.saturation,
+                      min: 0.0,
+                      max: 2.0,
+                      onChanged: _applySaturation,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Action buttons
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 12,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _reset,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Reset'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMedium ? 24 : 16,
+                          vertical: isMedium ? 14 : 12,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      AdjustmentSlider(
-                        label: 'Brightness',
-                        value: _state.brightness,
-                        min: -1.0,
-                        max: 1.0,
-                        onChanged: _adjustBrightness,
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Image processing completed!'),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.save),
+                      label: const Text('Save'),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isMedium ? 24 : 16,
+                          vertical: isMedium ? 14 : 12,
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      AdjustmentSlider(
-                        label: 'Contrast',
-                        value: _state.contrast,
-                        min: 0.5,
-                        max: 2.0,
-                        onChanged: _adjustContrast,
-                      ),
-                      const SizedBox(height: 8),
-                      AdjustmentSlider(
-                        label: 'Saturation',
-                        value: _state.saturation,
-                        min: 0.0,
-                        max: 2.0,
-                        onChanged: _applySaturation,
-                      ),
-                    ],
-                  ),
-                ),
-                // Action buttons
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _reset,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Reset'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Image processing completed!'),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.save),
-                        label: const Text('Save'),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -272,12 +276,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
             return Row(
               children: [
                 Expanded(flex: 3, child: imageArea),
-                SizedBox(
-                  width: 420,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: controls,
-                  ),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 450, minWidth: 350),
+                  child: controls,
                 ),
               ],
             );
@@ -285,8 +286,8 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
 
           return Column(
             children: [
-              Expanded(flex: 3, child: imageArea),
-              Expanded(flex: 2, child: controls),
+              Expanded(flex: isMedium ? 3 : 2, child: imageArea),
+              Expanded(flex: isMedium ? 2 : 3, child: controls),
             ],
           );
         },
