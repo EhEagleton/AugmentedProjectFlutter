@@ -1,7 +1,25 @@
+def localPropertiesFile = rootProject.file('local.properties')
+def localProperties = new Properties()
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+
 allprojects {
     repositories {
         google()
         mavenCentral()
+        if (flutterRoot != null) {
+            maven {
+                url "$flutterRoot/bin/cache/artifacts/engine/android-arm-release"
+            }
+            maven {
+                url "$flutterRoot/bin/cache/artifacts/engine/android-arm64-release"
+            }
+        }
     }
 }
 
