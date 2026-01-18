@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../models/processing_state.dart';
 import '../widgets/adjustment_slider.dart';
+import '../widgets/error_dialog.dart';
 import '../services/image_processor_service.dart';
 
 class ImageEditorScreen extends StatefulWidget {
@@ -44,9 +45,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error applying filter: $e')),
-        );
+        ErrorDialog.show(context, 'Error Applying Filter', e.toString());
       }
     }
     setState(() => _isProcessing = false);
@@ -62,9 +61,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       setState(() => _state.processedImage = processed);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error adjusting brightness: $e')),
-        );
+        ErrorDialog.show(context, 'Error Adjusting Brightness', e.toString());
       }
     }
     setState(() => _isProcessing = false);
@@ -80,9 +77,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       setState(() => _state.processedImage = processed);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error adjusting contrast: $e')),
-        );
+        ErrorDialog.show(context, 'Error Adjusting Contrast', e.toString());
       }
     }
     setState(() => _isProcessing = false);
@@ -98,9 +93,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       setState(() => _state.processedImage = processed);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error adjusting saturation: $e')),
-        );
+        ErrorDialog.show(context, 'Error Adjusting Saturation', e.toString());
       }
     }
     setState(() => _isProcessing = false);
