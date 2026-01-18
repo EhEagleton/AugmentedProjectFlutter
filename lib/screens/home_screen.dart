@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:typed_data';
 import 'image_editor_screen.dart';
 import '../widgets/error_dialog.dart';
+import '../services/log_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -14,11 +15,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _picker = ImagePicker();
+  final LogService _log = LogService();
+
+  @override
+  void initState() {
+    super.initState();
+    _log.info('HomeScreen initialized');
+  }
 
   Future<void> _pickImage(ImageSource source) async {
+    _log.info('Picking image from ${source.name}');
     try {
       if (kIsWeb && source == ImageSource.camera) {
         if (!mounted) return;
+        _log.warn('Camera not supported on web');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Camera not supported on web. Use gallery instead.')),
         );
@@ -27,17 +37,21 @@ class _HomeScreenState extends State<HomeScreen> {
       
       final XFile? image = await _picker.pickImage(source: source);
       if (image != null) {
+        _log.info('Image selected: ${image.name}');
         final imageBytes = await image.readAsBytes();
+        _log.info('Image loaded: ${imageBytes.length} bytes');
         if (!mounted) return;
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => ImageEditorScreen(imageData: imageBytes),
           ),
         );
+      } else {
+        _log.info('Image selection cancelled');
       }
     } catch (e) {
       if (!mounted) return;
-      print('Error picking image: $e');
+      _log.error('Error picking image: $e');
       ErrorDialog.show(context, 'Error Picking Image', e.toString());
     }
   }

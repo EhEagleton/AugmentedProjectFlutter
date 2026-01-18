@@ -4,6 +4,7 @@ import '../models/processing_state.dart';
 import '../widgets/adjustment_slider.dart';
 import '../widgets/error_dialog.dart';
 import '../services/image_processor_service.dart';
+import '../services/log_service.dart';
 
 class ImageEditorScreen extends StatefulWidget {
   final Uint8List imageData;
@@ -18,21 +19,26 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   late ImageProcessorService _processorService;
   ProcessingState _state = ProcessingState();
   bool _isProcessing = false;
+  final LogService _log = LogService();
 
   @override
   void initState() {
     super.initState();
+    _log.info('ImageEditorScreen initialized');
     _processorService = ImageProcessorService('');
     _loadOriginalImage();
   }
 
   void _loadOriginalImage() async {
+    _log.info('Loading original image: ${widget.imageData.length} bytes');
     _state.originalImage = widget.imageData;
     _state.processedImage = _state.originalImage;
     setState(() {});
+    _log.info('Image loaded successfully');
   }
 
   Future<void> _applyFilter(String filterName) async {
+    _log.info('Applying filter: $filterName');
     setState(() => _isProcessing = true);
     try {
       final processed = await _processorService.applyFilter(
@@ -43,7 +49,9 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         _state.processedImage = processed;
         _state.currentFilter = filterName;
       });
+      _log.info('Filter applied successfully: $filterName');
     } catch (e) {
+      _log.error('Error applying filter $filterName: $e');
       if (mounted) {
         ErrorDialog.show(context, 'Error Applying Filter', e.toString());
       }
@@ -52,6 +60,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   Future<void> _adjustBrightness(double value) async {
+    _log.debug('Adjusting brightness: $value');
     setState(() => _isProcessing = true);
     try {
       final processed = await _processorService.adjustBrightness(
@@ -60,6 +69,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       );
       setState(() => _state.processedImage = processed);
     } catch (e) {
+      _log.error('Error adjusting brightness: $e');
       if (mounted) {
         ErrorDialog.show(context, 'Error Adjusting Brightness', e.toString());
       }
@@ -68,6 +78,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   Future<void> _adjustContrast(double value) async {
+    _log.debug('Adjusting contrast: $value');
     setState(() => _isProcessing = true);
     try {
       final processed = await _processorService.adjustContrast(
@@ -76,6 +87,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       );
       setState(() => _state.processedImage = processed);
     } catch (e) {
+      _log.error('Error adjusting contrast: $e');
       if (mounted) {
         ErrorDialog.show(context, 'Error Adjusting Contrast', e.toString());
       }
@@ -84,6 +96,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   Future<void> _applySaturation(double value) async {
+    _log.debug('Adjusting saturation: $value');
     setState(() => _isProcessing = true);
     try {
       final processed = await _processorService.adjustSaturation(
@@ -92,6 +105,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
       );
       setState(() => _state.processedImage = processed);
     } catch (e) {
+      _log.error('Error adjusting saturation: $e');
       if (mounted) {
         ErrorDialog.show(context, 'Error Adjusting Saturation', e.toString());
       }
@@ -100,6 +114,7 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
   }
 
   void _reset() {
+    _log.info('Resetting all adjustments');
     setState(() {
       _state.processedImage = _state.originalImage;
       _state.currentFilter = '';
