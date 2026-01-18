@@ -133,10 +133,10 @@ class _LogPanelState extends State<LogPanel> {
           ),
         ),
         // Expandable log content
-        if (_isExpanded)
-          Container(
-            height: _panelHeight,
-            color: Colors.grey.shade850,
+              if (_isExpanded)
+              Container(
+                height: _panelHeight,
+                color: Colors.grey.shade900,
             child: _logService.logs.isEmpty
                 ? const Center(
                     child: Text(
